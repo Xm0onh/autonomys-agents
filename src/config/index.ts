@@ -8,7 +8,7 @@ import { llmDefaultConfig } from './llm.js';
 import { twitterDefaultConfig } from './twitter.js';
 import { memoryDefaultConfig } from './memory.js';
 import yaml from 'yaml';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +21,18 @@ try {
   console.error('Error creating cookies directory:', error);
 }
 
-dotenv.config({ path: path.resolve(workspaceRoot, '.env') });
+// Get character ID from command line args
+const characterId = process.argv[2]?.replace(/\.(ya?ml)$/, '');
+
+// Load character-specific .env if it exists, otherwise fall back to root .env
+const characterEnvPath = characterId
+  ? path.resolve(workspaceRoot, 'config', characterId, '.env')
+  : null;
+if (characterEnvPath && existsSync(characterEnvPath)) {
+  dotenv.config({ path: characterEnvPath });
+} else {
+  dotenv.config({ path: path.resolve(workspaceRoot, '.env') });
+}
 
 function formatZodError(error: z.ZodError) {
   const missingVars = error.issues.map(issue => {
@@ -37,6 +48,16 @@ export const agentVersion = process.env.AGENT_VERSION || '1.0.0';
 
 const yamlConfig = (() => {
   try {
+    // Try to load character-specific config first
+    if (characterId) {
+      const characterConfigPath = path.join(workspaceRoot, 'config', characterId, 'config.yaml');
+      if (existsSync(characterConfigPath)) {
+        const fileContents = readFileSync(characterConfigPath, 'utf8');
+        return yaml.parse(fileContents);
+      }
+    }
+
+    // Fall back to root config.yaml
     const configPath = path.join(workspaceRoot, 'config', 'config.yaml');
     const fileContents = readFileSync(configPath, 'utf8');
     return yaml.parse(fileContents);
@@ -50,7 +71,7 @@ export const config = (() => {
   try {
     const username = process.env.TWITTER_USERNAME || '';
     const cookiesPath = path.join(cookiesDir, `${username}-cookies.json`);
-
+    console.log('yamlConfig', yamlConfig);
     const rawConfig = {
       twitterConfig: {
         USERNAME: username,
