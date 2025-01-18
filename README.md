@@ -102,7 +102,7 @@ The framework uses a YAML-based character system that allows you to create and r
 2. Create new characters by copying the example:
    ```bash
    # Create a new character
-   cp config/characters/joy_builder.yaml config/characters/my-character.yaml
+   cp config/characters/character.example.yaml config/characters/my-character.yaml
    ```
 
 ### Character Configuration
@@ -153,11 +153,14 @@ engagement_criteria:
 
 Run the agent with a specific character:
 
+You can run the agent with a specific character by providing the character name as an argument.
+
 ```bash
 # Use default character (configured in config.yaml)
-yarn dev  # for development with auto-reload
+yarn dev  # for development with auto-reload - select from list of characters
 # or
-yarn start  # for production build and run
+yarn start  # for production build and run - select from list of characters
+
 
 # Use a specific character (omit .yaml extension)
 yarn dev my-agent  # for development with auto-reload
@@ -221,7 +224,7 @@ To use this feature:
 1. Configure your AUTO_DRIVE_API_KEY in `.env` (obtain from https://ai3.storage)
 2. Enable Auto Drive uploading in your `config.yaml`:
    ```yaml
-   autodrive:
+   auto_drive:
      upload: true
    ```
 3. Provide your Taurus EVM wallet details (PRIVATE_KEY) and Agent Memory Contract Address (CONTRACT_ADDRESS) in .env`
@@ -246,10 +249,10 @@ The KOL workflow enables agents to:
 Start the agent with:
 
 ```bash
-# Use default character
+# Use example character or select from list of characters
 yarn dev
 
-# Use a specific character (without .ts extension)
+# Use specific character
 yarn dev my-agent
 ```
 
